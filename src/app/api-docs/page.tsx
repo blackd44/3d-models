@@ -1,10 +1,10 @@
-import { getApiDocs } from "@/lib/swagger";
+import { generateOpenApiSpec } from "@/lib/swagger";
 import ReactSwagger from "./react-swagger";
 
 export default async function IndexPage() {
-  const spec = await getApiDocs();
+  const spec = generateOpenApiSpec();
   return (
-    <section className="container">
+    <section className="min-h-dvh bg-foreground flex flex-col">
       <ReactSwagger spec={spec} />
     </section>
   );

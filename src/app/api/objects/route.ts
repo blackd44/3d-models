@@ -1,17 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { TObject } from "@/types/object";
 import { type NextRequest, NextResponse } from "next/server";
-// import { Database } from "@/lib/db"
 
-/**
- * @swagger
- * /api/objects:
- *   get:
- *     description: Returns a greeting
- *     responses:
- *       200:
- *         description: greeting message
- */
 export async function GET() {
   try {
     const objects = await prisma.object.findMany({
