@@ -1,0 +1,2 @@
+overrides:
+  nextjs-swagger-autogen: link:../../../.local/share/pnpm/global/5/node_modules/nextjs-swagger-autogen

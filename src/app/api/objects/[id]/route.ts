@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { Database } from "@/lib/db";
 import { deleteFromCloudinary } from "@/lib/cloudinary";
+import { prisma } from "@/lib/prisma";
 
 // GET - Fetch single object
 export async function GET(
@@ -9,7 +9,10 @@ export async function GET(
 ) {
   try {
     const id = Number.parseInt(params.id);
-    const object = await Database.getObjectById(id);
+    const object = await prisma.object.findFirst({
+      where: { id, status: "published" },
+      orderBy: { created_at: "desc" },
+    });
 
     if (!object)
       return NextResponse.json(
@@ -18,7 +21,10 @@ export async function GET(
       );
 
     // Increment view count
-    await Database.incrementViews(id);
+    await prisma.object.update({
+      where: { id },
+      data: { views: { increment: 1 } },
+    });
 
     return NextResponse.json({ success: true, data: object });
   } catch (error) {
@@ -45,7 +51,9 @@ export async function PUT(
     }
 
     // Check if object exists
-    const existingObject = await Database.getObjectById(id);
+    const existingObject = await prisma.object.findFirst({
+      where: { id, status: "published" },
+    });
     if (!existingObject) {
       return NextResponse.json(
         { success: false, error: "Object not found" },
@@ -81,7 +89,10 @@ export async function PUT(
       updateData.thumbnail_public_id = body.thumbnailPublicId;
     }
 
-    const updatedObject = await Database.updateObject(id, updateData);
+    const updatedObject = await prisma.object.update({
+      where: { id },
+      data: updateData,
+    });
     return NextResponse.json({ success: true, data: updatedObject });
   } catch (error) {
     console.error("API Error:", error);
@@ -107,7 +118,9 @@ export async function DELETE(
     }
 
     // Get object details first to delete from Cloudinary
-    const object = await Database.getObjectById(id);
+    const object = await prisma.object.findFirst({
+      where: { id, status: "published" },
+    });
     if (!object) {
       return NextResponse.json(
         { success: false, error: "Object not found" },
@@ -129,7 +142,9 @@ export async function DELETE(
     }
 
     // Delete from database
-    const deleted = await Database.deleteObject(id);
+    const deleted = await prisma.object.delete({
+      where: { id },
+    });
 
     if (!deleted) {
       return NextResponse.json(
